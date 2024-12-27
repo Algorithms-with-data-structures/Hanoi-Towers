@@ -1,237 +1,197 @@
-//HANOJSKI STOLPI
+//TOWERS OF HANOI
 
 #include <iostream>
 using namespace std;
 
-void menu() {
-	cout << "1. Nastavi zacetno stanje igre." << endl;
-	cout << "2. Prestavi zgornji element iz stolpa Y na palico Z." << endl;
-	cout << "3. Izpisi stolpe." << endl;
-	cout << "Izbira: ";
+void displayMenu() {
+    cout << "1) Set initial state of the game." << endl;
+    cout << "2) Move the top disk from tower X to tower Y." << endl;
+    cout << "3) Display towers." << endl;
+    cout << "Choice: ";
 }
 
-void push(int* stolp, int stevilo, int& vrh, int max) {
-	if ((vrh - 1)== max) {                                               //èe je indeks VRH enak velikosti sklada, je sklad poln 
-		cout << "NAPAKA: Stolp je poln!" << endl;
-		cout << endl;
-	}
-	else {
-		stolp[vrh] = stevilo;
-		vrh++;
-	}
+void push(int* tower, int value, int& top, int max) {
+    if ((top - 1) == max) { // If the index TOP equals the size of the stack, the stack is full
+        cout << "ERROR: Tower is full!" << endl;
+        cout << endl;
+    }
+    else {
+        tower[top] = value;
+        top++;
+    }
 }
 
-int pop(int* sklad, int& vrh) {
-	if (vrh == 0) {                                                 //èe je indeks VRH enak 0 pomeni, da je skad prazen...
-		cout << "NAPAKA: Stolp je prazen!" << endl;
-		cout << endl;
-	}
-	else {
-		vrh--;                                                      //...drugaèe izpišemo zaden element v skladu in zmanšamo VRH za 1
-		return sklad[vrh];
-	}
+int pop(int* stack, int& top) {
+    if (top == 0) { // If the index TOP equals 0, it means the stack is empty
+        cout << "ERROR: Tower is empty!" << endl;
+        cout << endl;
+    }
+    else {
+        top--; // Otherwise, return the last element in the stack and decrease TOP by 1
+        return stack[top];
+    }
 }
 
-int startingState(int& vrh1, int& vrh2, int& vrh3, int*& stolp1, int*& stolp2, int*& stolp3) {
-	int stevilo;
-	cout << "Stevilo ploscic na 1. stolpu: ";
-	cin >> stevilo;
-	const int max = stevilo;							//uporabnik vnese najveèje število v stolpu
+int setInitialState(int& top1, int& top2, int& top3, int*& tower1, int*& tower2, int*& tower3) {
+    int numDisks;
+    cout << "Number of disks on the 1st tower: ";
+    cin >> numDisks;
+    const int max = numDisks; // User enters the maximum number of disks on the tower
 
-	stolp1 = new int[max];
-	for (int i = 0; i < max; i++) {				//sestavimo stolp (sklad) dolžine "stevilo" s padajoèimi števili
-		push(stolp1, stevilo, vrh1, max);
-		stevilo--;
-	}
+    tower1 = new int[max];
+    for (int i = 0; i < max; i++) { // Build the tower (stack) of length "numDisks" with descending numbers
+        push(tower1, numDisks, top1, max);
+        numDisks--;
+    }
 
-	stolp2 = new int[max];
-	/*for (int i = 0; i < max; i++) {
-		push(stolp2, NULL , vrh2, max);
-	}*/
-												//vrednosti v 2. in 3. stolpu nastavimo na null
-	stolp3 = new int[max];
-	/*for (int i = 0; i < max; i++) {
-		push(stolp3, NULL, vrh3, max);
-	}*/
-												
+    tower2 = new int[max];
+    tower3 = new int[max];
 
-	/*cout << "STOLP 1: ";
-	for (unsigned int i = 0; i < vrh1; i++) {
-		cout << stolp1[i] << " ";
-	}
-	cout << endl;
-
-	cout << "STOLP 2: ";
-	cout << stolp2[0] << endl;
-	cout << "STOLP 1: ";
-	cout << stolp3[0] << endl;
-	*/
-	cout << endl;
-	return max;
+    cout << endl;
+    return max;
 }
 
-void transfer(int max, int& vrh1, int& vrh2, int& vrh3, int*& stolp1, int*& stolp2, int*& stolp3) {
-	int y;				//stolp, iz katerega prenašamo
-	int z;				//stolp v katerga prenašamo
-	int prenos;			//število, ki bomo prenašali
+void transferDisk(int max, int& top1, int& top2, int& top3, int*& tower1, int*& tower2, int*& tower3) {
+    int fromTower; // Tower from which to transfer
+    int toTower;   // Tower to which to transfer
+    int disk;      // Disk to transfer
 
-	cout << "Iz katerega na kateri stolp zelite prestaviti? (Vrednosti 1-3)." << endl;
+    cout << "From which tower to which tower do you want to move? (Values 1-3)." << endl;
 
-	cout << "Iz: ";
-	cin >> y;
-	while (y < 1 || y>3) {													//dobimo številko stolpa iz katerega prestavljamo
-		cout << "Napacna izbira (vrednost med 1-3):" << endl << "Iz: ";
-		cin >> y;
-	}
+    cout << "From: ";
+    cin >> fromTower;
+    while (fromTower < 1 || fromTower > 3) { // Get the number of the tower to transfer from
+        cout << "Invalid choice (value between 1-3):" << endl << "From: ";
+        cin >> fromTower;
+    }
 
-	cout << "Na: ";
-	cin >> z;
-	while ((z < 1 || z>3) || z == y) {													//dobimo številko stolpa v katerga prestavljamo
-		cout << "Napacna izbira (vrednost med 1-3): " << endl << "Iz: ";
-		cin >> z;
-	}
-	cout << endl;
+    cout << "To: ";
+    cin >> toTower;
+    while ((toTower < 1 || toTower > 3) || toTower == fromTower) { // Get the number of the tower to transfer to
+        cout << "Invalid choice (value between 1-3): " << endl << "To: ";
+        cin >> toTower;
+    }
+    cout << endl;
 
-	if (y == 1 && z == 2) {													//obstaja 6 kombinacij, preverimo katera ustreza ... 
-		if ((stolp1[vrh1] > stolp2[vrh2]) && vrh2 != 0) {
-			cout << "Vecjega stevila ne moremo prestaviti na manjsega!" << endl;		//èe je zgornja vrednost na y stolpu veèja od zgornje vrednosti na stolpu z, javi napako ...
-		}
-		else {
-			prenos = pop(stolp1, vrh1);													// ... sicer "vzamemo" zgornjo vrednost z y stolpa in jo prestavimo na zgornjo vrednost z stolpa
-			push(stolp2, prenos, vrh2, max);
-		}
-	}
+    if (fromTower == 1 && toTower == 2) {
+        if ((tower1[top1 - 1] > tower2[top2 - 1]) && top2 != 0) {
+            cout << "Cannot place a larger disk on a smaller disk!" << endl;
+        }
+        else {
+            disk = pop(tower1, top1);
+            push(tower2, disk, top2, max);
+        }
+    }
+    else if (fromTower == 1 && toTower == 3) {
+        if (tower1[top1 - 1] > tower3[top3 - 1] && top3 != 0) {
+            cout << "Cannot place a larger disk on a smaller disk!" << endl;
+            cout << endl;
+        }
+        else {
+            disk = pop(tower1, top1);
+            push(tower3, disk, top3, max);
+        }
+    }
+    else if (fromTower == 2 && toTower == 1) {
+        if (tower2[top2 - 1] > tower1[top1 - 1] && top1 != 0) {
+            cout << "Cannot place a larger disk on a smaller disk!" << endl;
+            cout << endl;
+        }
+        else {
+            disk = pop(tower2, top2);
+            push(tower1, disk, top1, max);
+        }
+    }
+    else if (fromTower == 2 && toTower == 3) {
+        if (tower2[top2 - 1] > tower3[top3 - 1] && top3 != 0) {
+            cout << "Cannot place a larger disk on a smaller disk!" << endl;
+            cout << endl;
+        }
+        else {
+            disk = pop(tower2, top2);
+            push(tower3, disk, top3, max);
+        }
+    }
+    else if (fromTower == 3 && toTower == 1) {
+        if (tower3[top3 - 1] > tower1[top1 - 1] && top1 != 0) {
+            cout << "Cannot place a larger disk on a smaller disk!" << endl;
+            cout << endl;
+        }
+        else {
+            disk = pop(tower3, top3);
+            push(tower1, disk, top1, max);
+        }
+    }
+    else if (fromTower == 3 && toTower == 2) {
+        if (tower3[top3 - 1] > tower2[top2 - 1] && top2 != 0) {
+            cout << "Cannot place a larger disk on a smaller disk!" << endl;
+            cout << endl;
+        }
+        else {
+            disk = pop(tower3, top3);
+            push(tower2, disk, top2, max);
+        }
+    }
 
-	else if (y == 1 && z == 3) {
-		if (stolp1[vrh1] > stolp3[vrh3] && vrh3 != 0) {
-			cout << "Vecjega stevila ne moremo prestaviti na manjsega!" << endl;
-			cout << endl;
-		}
-		else {
-			prenos = pop(stolp1, vrh1);
-			push(stolp3, prenos, vrh3, max);
-		}
-	}
-
-	else if (y == 2 && z == 1) {
-		if (stolp2[vrh2] > stolp1[vrh1] && vrh1 != 0) {
-			cout << "Vecjega stevila ne moremo prestaviti na manjsega!" << endl;
-			cout << endl;
-		}
-		else {
-			prenos = pop(stolp2, vrh2);
-			push(stolp1, prenos, vrh1, max);
-		}
-	}
-
-	else if (y == 2 && z == 3) {
-		if (stolp2[vrh2] > stolp3[vrh3] && vrh3 != 0) {
-			cout << "Vecjega stevila ne moremo prestaviti na manjsega!" << endl;
-			cout << endl;
-		}
-		else {
-			prenos = pop(stolp2, vrh2);
-			push(stolp3, prenos, vrh3, max);
-		}
-	}
-
-	else if (y == 3 && z == 1) {
-		if (stolp3[vrh3] > stolp1[vrh1] && vrh1 != 0) {
-			cout << "Vecjega stevila ne moremo prestaviti na manjsega!" << endl;
-			cout << endl;
-		}
-		else {
-			prenos = pop(stolp3, vrh3);
-			push(stolp1, prenos, vrh1, max);
-		}
-	}
-
-	else if (y == 3 && z == 2) {
-		if (stolp3[vrh3] > stolp2[vrh2] && vrh2 != 0) {
-			cout << "Vecjega stevila ne moremo prestaviti na manjsega!" << endl;
-			cout << endl;
-		}
-		else {
-			prenos = pop(stolp3, vrh3);
-			push(stolp2, prenos, vrh2, max);
-		}
-	}
-
-	if (vrh1 == 0) {
-		cout << "KONEC IGRE!" << endl;
-	}
+    if (top1 == 0) {
+        cout << "GAME OVER!" << endl;
+    }
 }
 
-void print(int vrh1, int vrh2, int vrh3, int* stolp1, int* stolp2, int* stolp3) {
-	cout << endl;
-	cout << "STOLP 1: ";
-	for (int i = 0; i < vrh1; i++) {
-		cout << stolp1[i] << " ";
-	}
-	cout << endl;
+void displayTowers(int top1, int top2, int top3, int* tower1, int* tower2, int* tower3) {
+    cout << endl;
+    cout << "TOWER 1: ";
+    for (int i = 0; i < top1; i++) {
+        cout << tower1[i] << " ";
+    }
+    cout << endl;
 
-	cout << "STOLP 2: ";
-	for (int i = 0; i < vrh2; i++) {
-		cout << stolp2[i] << " ";
-	}
-	cout << endl;
+    cout << "TOWER 2: ";
+    for (int i = 0; i < top2; i++) {
+        cout << tower2[i] << " ";
+    }
+    cout << endl;
 
-	cout << "STOLP 3: ";
-	for (int i = 0; i < vrh3; i++) {
-		cout << stolp3[i] << " ";
-	}
-	cout << endl;
-	cout << endl;
-
-	/*
-	for (int j = 1; j < max; j++) {
-		for (int k = 0; k < stolp1[vrh1]; k++) {
-			cout << "*";
-		}
-		vrh1--;
-		cout << endl;
-	}
-	*/
-
+    cout << "TOWER 3: ";
+    for (int i = 0; i < top3; i++) {
+        cout << tower3[i] << " ";
+    }
+    cout << endl;
+    cout << endl;
 }
-
-
 
 int main() {
-	bool running = true;
-	int izbira;
+    bool running = true;
+    int choice;
 
-	int* stolp1= nullptr;
-	int* stolp2= nullptr;
-	int* stolp3= nullptr;
+    int* tower1 = nullptr;
+    int* tower2 = nullptr;
+    int* tower3 = nullptr;
 
-	int vrh1 = 0;
-	int vrh2 = 0;
-	int vrh3 = 0;
-	int max = 0;
+    int top1 = 0;
+    int top2 = 0;
+    int top3 = 0;
+    int max = 0;
 
-	do {
-		menu();
-		cin >> izbira;
-		switch (izbira) {
-		case 1:
-			max=startingState(vrh1, vrh2, vrh3, stolp1, stolp2, stolp3);
-			//system("cls");
-			break;
-		case 2:
-			transfer(max, vrh1, vrh2, vrh3, stolp1, stolp2, stolp3);
-			//system("cls");
-			break;
-		case 3:
-			print(vrh1, vrh2, vrh3, stolp1, stolp2, stolp3);
-			break;
-		default:
-			cout << "Narobe izbira!" << endl;
-			break;
-		}
-	} while (running);
+    do {
+        displayMenu();
+        cin >> choice;
+        system("cls");
+        switch (choice) {
+        case 1:
+            max = setInitialState(top1, top2, top3, tower1, tower2, tower3);
+            break;
+        case 2:
+            transferDisk(max, top1, top2, top3, tower1, tower2, tower3);
+            break;
+        case 3:
+            displayTowers(top1, top2, top3, tower1, tower2, tower3);
+            break;
+        default:
+            cout << "Invalid choice!" << endl;
+            break;
+        }
+    } while (running);
 
-	return 0;
+    return 0;
 }
-
-
